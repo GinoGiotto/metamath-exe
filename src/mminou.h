@@ -95,7 +95,7 @@ extern flag g_commandFileSilent[MAX_COMMAND_FILE_NESTING + 1];
  * If set to 1, suppresses prompts on input.  Activated through
  * SUBMIT ... /SILENT commands.  Initialized to 0 on program start.
  */
-extern flag g_commandFileSilentFlag; /* For SUBMIT ... /SILENT */
+extern flag g_commandFileSilentFlag; // For SUBMIT ... /SILENT
 
 extern FILE *g_input_fp;  /*!< File pointers */
 extern vstring g_input_fn, g_output_fn;  /*!< File names */

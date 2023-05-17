@@ -37,7 +37,7 @@ struct getStep_struct {
   long targetStmt; // Left side of = in proof display
   long targetParentStep; // Step # of target's parent
   long targetParentStmt; // Statement # of target's parent
-  nmbrString *sourceHyps; // List of step #'s */
+  nmbrString *sourceHyps; // List of step #'s
   nmbrString *sourceSubstsNmbr; // List of vars w/ ptr to subst math tokens
   pntrString *sourceSubstsPntr; // List of vars w/ ptr to subst math tokens
   nmbrString *targetSubstsNmbr; // List of vars w/ ptr to subst math tokens

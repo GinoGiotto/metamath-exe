@@ -131,7 +131,7 @@ struct wrkProof_struct {
   pntrString *mathStringPtrs;
   nmbrString *RPNStack; /*!< Stack for RPN parsing */
 
-  /* For compressed proof parsing */
+  // For compressed proof parsing
   nmbrString *compressedPfLabelMap; /*!< Map from compressed label to actual */
   long compressedPfNumLabels; /*!< Number of compressed labels */
 };

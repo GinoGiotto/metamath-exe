@@ -105,7 +105,7 @@ typedef char flag;
  * \ref flag occasionally, but its value is in fact fixed to 0 in metamath,
  * meaning the LIST.EXE functionality is an integral part of metamath now.
  */
-extern flag g_listMode; /* 0 = metamath, 1 = list utility */
+extern flag g_listMode; // 0 = metamath, 1 = list utility
 
 /*!
  * \var g_toolsMode
@@ -726,7 +726,7 @@ long compressedProofSize(const nmbrString *proof, long statemNum);
  *
  * \invariant always refers the null pointer element behind the valid data.
  */
-extern long g_pntrTempAllocStackTop;   /* Top of stack for pntrTempAlloc function */
+extern long g_pntrTempAllocStackTop; // Top of stack for pntrTempAlloc function
 
 /*!
  * \var long g_pntrStartTempAllocStack
@@ -805,7 +805,7 @@ void pntrLet(pntrString **target, const pntrString *source);
 /*! String concatenation - last argument MUST be NULL */
 temp_pntrString *pntrCat(const pntrString *string1,...);
 
-/* Emulation of pntrString functions similar to BASIC string functions */
+// Emulation of pntrString functions similar to BASIC string functions
 temp_pntrString *pntrSeg(const pntrString *sin, long p1, long p2);
 temp_pntrString *pntrMid(const pntrString *sin, long p, long length);
 temp_pntrString *pntrLeft(const pntrString *sin, long n);
@@ -945,4 +945,4 @@ int qsortStringCmp(const void *p1, const void *p2);
 /*! Call on exit to free memory */
 void freeData(void);
 
-#endif /* METAMATH_MMDATA_H_ */
+#endif // METAMATH_MMDATA_H_

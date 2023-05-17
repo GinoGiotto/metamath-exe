@@ -190,8 +190,8 @@ flag writeBibliography(vstring bibFile,
 /*! Globals to hold mathbox information.  They should be re-initialized
    by the ERASE command (eraseSource()).  g_mathboxStmt = 0 indicates
    it and the other variables haven't been initialized. */
-extern long g_mathboxStmt; /* stmt# of "mathbox" label; statements+1 if none */
-extern long g_mathboxes; /* # of mathboxes */
+extern long g_mathboxStmt; // stmt# of "mathbox" label; statements+1 if none
+extern long g_mathboxes; // # of mathboxes
 // The following 3 "strings" are 0-based e.g. g_mathboxStart[0] is for mathbox #1
 extern nmbrString *g_mathboxStart; /*!< Start stmt vs. mathbox # */
 extern nmbrString *g_mathboxEnd; /*!< End stmt vs. mathbox # */

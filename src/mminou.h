@@ -19,7 +19,7 @@
 
 extern int g_errorCount;     /*!< Total error count */
 
-/* Global variables used by print2() */
+// Global variables used by print2()
 
 /*!
  * \var flag g_logFileOpenFlag
@@ -52,7 +52,7 @@ extern flag g_outputToString;
  */
 extern vstring g_printString;
 
-/* Global variables used by cmdInput() */
+// Global variables used by cmdInput()
 
 /*!
  * \def MAX_COMMAND_FILE_NESTING
@@ -750,4 +750,4 @@ double getRunTime(double *timeSinceLastCall);
 /*! Call before exiting to free memory allocated by this module */
 void freeInOu(void);
 
-#endif /* METAMATH_MMINOU_H_*/
+#endif // METAMATH_MMINOU_H_

@@ -14,7 +14,7 @@
 
 #include "mmvstr.h"
 
-/* debugging flags & variables */
+// debugging flags & variables
 
 /*!
  * \var long db
@@ -115,9 +115,9 @@ extern flag g_listMode; /* 0 = metamath, 1 = list utility */
  * executing the 'tools' command.  In this mode text files are processed using
  * high level commands.  It is indicated by a 1 in \ref g_toolsMode.
  */
-extern flag g_toolsMode; /* In metamath mode:  0 = metamath, 1 = tools */
+extern flag g_toolsMode; // In metamath mode:  0 = metamath, 1 = tools
 
-typedef long nmbrString; /* String of numbers */
+typedef long nmbrString; // String of numbers
 
 /*!
  * \typedef pntrString
@@ -160,16 +160,16 @@ typedef long nmbrString; /* String of numbers */
  *   dedicated ownership and solving this problem more thoroughly, but Metamath
  *   is not up to that level (yet).
  */
-typedef void* pntrString; /* String of pointers */
+typedef void* pntrString; // String of pointers
 
-/* A nmbrString allocated in temporary storage. These strings will be deallocated
-   after the next call to `nmbrLet`.
-   See also `temp_vstring` for information on how temporaries are handled. */
+// A nmbrString allocated in temporary storage. These strings will be deallocated
+// after the next call to `nmbrLet`.
+// See also `temp_vstring` for information on how temporaries are handled.
 typedef nmbrString temp_nmbrString;
 
-/* A pntrString allocated in temporary storage. These strings will be deallocated
-   after the next call to `pntrLet`.
-   See also `temp_vstring` for information on how temporaries are handled. */
+// A pntrString allocated in temporary storage. These strings will be deallocated
+// after the next call to `pntrLet`.
+// See also `temp_vstring` for information on how temporaries are handled.
 
 /*!
  * \typedef temp_pntrString
@@ -184,23 +184,23 @@ typedef nmbrString temp_nmbrString;
 typedef pntrString temp_pntrString;
 
 enum mTokenType { var_, con_ };
-#define lb_ '{' /* ${ */
-#define rb_ '}' /* $} */
-#define v_  'v' /* $v */
-#define c_  'c' /* $c */
-#define a_  'a' /* $a */
-#define d_  'd' /* $d */
-#define e_  'e' /* $e */
-#define f_  'f' /* $f */
-#define p_  'p' /* $p */
-#define eq_ '=' /* $= */
-#define sc_ '.' /* $. (historically, used to be $; (semicolon) ) */
-#define illegal_ '?' /* anything else */
-/* Global variables related to current statement */
+#define lb_ '{' // ${
+#define rb_ '}' // $}
+#define v_  'v' // $v
+#define c_  'c' // $c
+#define a_  'a' // $a
+#define d_  'd' // $d
+#define e_  'e' // $e
+#define f_  'f' // $f
+#define p_  'p' // $p
+#define eq_ '=' // $=
+#define sc_ '.' // $. (historically, used to be $; (semicolon) )
+#define illegal_ '?' // anything else
+// Global variables related to current statement
 extern int g_currentScope;
 
 /*! The data associated with a statement in the file */
-struct statement_struct { /* Array index is statement number, starting at 1 */
+struct statement_struct { // Array index is statement number, starting at 1
   long lineNum; /*!< Line number in file; 0 means not yet determined */
   vstring fileName; /*!< File statement is in; "" means not yet determined */
   vstring labelName; /*!< Label of statement */
@@ -288,7 +288,7 @@ extern long *g_mathKey;
 extern long g_MAX_STATEMENTS;
 extern long g_MAX_MATHTOKENS;
 extern struct statement_struct *g_Statement;
-/*Obs*/ /*extern struct label_struct *label;*/
+// Obs // extern struct label_struct *label;
 
 /*! \warning `mathToken[i]` is 0-based, not 1-based! */
 extern struct mathToken_struct *g_MathToken;
@@ -301,14 +301,14 @@ extern long g_includeCalls;
 extern char *g_sourcePtr; /*!< Pointer to buffer in memory with input source */
 extern long g_sourceLen; /*!< Number of chars. in all inputs files combined (after includes)*/
 
-/* For use by getMarkupFlag() */
+// For use by getMarkupFlag()
 #define PROOF_DISCOURAGED_MARKUP "(Proof modification is discouraged.)"
 #define USAGE_DISCOURAGED_MARKUP "(New usage is discouraged.)"
-/* Mode argument for getMarkupFlag() */
+// Mode argument for getMarkupFlag()
 #define PROOF_DISCOURAGED 1
 #define USAGE_DISCOURAGED 2
 #define RESET 0
-/* Mode argument for getContrib() */
+// Mode argument for getContrib()
 #define GC_RESET 0
 #define GC_RESET_STMT 10
 #define CONTRIBUTOR 1
@@ -321,16 +321,16 @@ extern long g_sourceLen; /*!< Number of chars. in all inputs files combined (aft
 #define GC_ERROR_CHECK_SILENT 8
 #define GC_ERROR_CHECK_PRINT 9
 
-/* 14-May-2017 nm - TODO: someday we should create structures to
-   hold global vars, and clear their string components in eraseSource() */
+// 14-May-2017 nm - TODO: someday we should create structures to
+// hold global vars, and clear their string components in eraseSource().
 extern vstring g_contributorName;
 #define DEFAULT_CONTRIBUTOR "?who?"
 
 extern vstring g_proofDiscouragedMarkup;
 extern vstring g_usageDiscouragedMarkup;
-extern flag g_globalDiscouragement; /* SET DISCOURAGEMENT */
+extern flag g_globalDiscouragement; // SET DISCOURAGEMENT
 
-/* Allocation and deallocation in memory pool */
+// Allocation and deallocation in memory pool
 void *poolFixedMalloc(long size /* bytes */);
 
 /*!
@@ -402,7 +402,7 @@ void poolFree(void *ptr);
 void addToUsedPool(void *ptr);
 /*! Purges reset memory pool usage */
 void memFreePoolPurge(flag untilOK);
-/* Statistics */
+// Statistics
 
 /*!
  * \fn getPoolStats(long *freeAlloc, long *usedAlloc, long *usedActual)
@@ -580,10 +580,10 @@ flag matches(const char *testString, const char *pattern, char wildCard,
 /******* Special purpose routines for better
       memory allocation (use with caution) *******/
 
-extern long g_nmbrTempAllocStackTop;   /* Top of stack for nmbrTempAlloc function */
-extern long g_nmbrStartTempAllocStack; /* Where to start freeing temporary
-    allocation when nmbrLet() is called (normally 0, except for nested
-    nmbrString functions) */
+extern long g_nmbrTempAllocStackTop; // Top of stack for nmbrTempAlloc function
+ // Where to start freeing temporary allocation when nmbrLet() is called 
+ // (normally 0, except for nested nmbrString functions).
+extern long g_nmbrStartTempAllocStack;
 
 /*!
   When "size" is >0, "size" instances of nmbrString are allocated.
@@ -594,9 +594,8 @@ temp_nmbrString *nmbrTempAlloc(long size);
 /*! \brief Make string have temporary allocation to be released by next nmbrLet()
   \warning after nmbrMakeTempAlloc() is called, the nmbrString may NOT be
     assigned again with nmbrLet() */
+// Make string have temporary allocation to be released by next nmbrLet()
 temp_nmbrString *nmbrMakeTempAlloc(nmbrString *s);
-                                    /* Make string have temporary allocation to be
-                                    released by next nmbrLet() */
 
 /**************************************************/
 
@@ -744,9 +743,9 @@ extern long g_pntrTempAllocStackTop;   /* Top of stack for pntrTempAlloc functio
  * local dependency chain.  On return the saved value is restored.
  * \invariant always less or equal to \ref g_pntrTempAllocStackTop.
  */
-extern long g_pntrStartTempAllocStack; /* Where to start freeing temporary
-    allocation when pntrLet() is called (normally 0, except for nested
-    pntrString functions) */
+// Where to start freeing temporary allocation when pntrLet() is called
+// (normally 0, except for nested pntrString functions).
+extern long g_pntrStartTempAllocStack;
 
 /*!
  * \brief Make string have temporary allocation to be released by next pntrLet()
@@ -889,7 +888,7 @@ temp_pntrString *pntrAddElement(const pntrString *g);
 /*! Add a single null pntrString element to a pntrString - faster than pntrCat */
 temp_pntrString *pntrAddGElement(const pntrString *g);
 
-/* Utility functions */
+// Utility functions
 
 /*! 0/1 knapsack algorithm */
 long knapsack01(long items, long *size, long *worth, long maxSize,

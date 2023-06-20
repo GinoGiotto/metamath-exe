@@ -1170,7 +1170,6 @@ vstring htmlAllowedSubst(long showStmt)
     setVar[j] = (g_Statement[reqHyp[i]].mathString)[1];
     j++;
   }
-
   if (j != setVars) bug(253);
 
   // Scan "wff" and "class" variables for attached $d's
@@ -1242,17 +1241,17 @@ vstring htmlAllowedSubst(long showStmt)
         "<A HREF=\"",
 
         // g_htmlHome is set by htmlhome in $t comment
-        (instr(1, g_htmlHome, "mmset.html") > 0) ? 
+        (instr(1, g_htmlHome, "mmset.html") > 0) ?
             "mmset.html" :
             // The following link will work in the NF and other "Proof Explorers".
             "../mpeuni/mmset.html",
 
-            "#allowedsubst\">Allowed substitution</A> hint",
-            ((countInfo != 1) ? "s" : ""), ": ",
-            (g_altHtmlFlag ? cat("<SPAN ", g_htmlFont, ">", NULL) : ""),
-            htmlAllowedList,
-            (g_altHtmlFlag ? "</SPAN>" : ""),
-            "</CENTER>", NULL));
+        "#allowedsubst\">Allowed substitution</A> hint",
+        ((countInfo != 1) ? "s" : ""), ": ",
+        (g_altHtmlFlag ? cat("<SPAN ", g_htmlFont, ">", NULL) : ""),
+        htmlAllowedList,
+        (g_altHtmlFlag ? "</SPAN>" : ""),
+        "</CENTER>", NULL));
   }
 
   // Deallocate strings
@@ -1900,7 +1899,7 @@ void typeProof(long statemNum,
                 NULL),
                 contPrefix,
                 chr(1)); // chr(1) is right-justify flag for printLongLine
-          } else {  // TeX or HTML
+          } else { // TeX or HTML
             printTexLongMath(g_ProofInProgress.target[step],
                 cat(startPrefix, " $", chr(type), " ", NULL),
                 contPrefix, 0, 0);
@@ -1974,7 +1973,7 @@ void typeProof(long statemNum,
       // and the statement, and add their syntax to the hints list.
 
       // Array index of the hard-coded token "wff" - static so we only have
-      // to look it up once - set to -2 if not found
+      // to look it up once - set to -2 if not found.
       static long wffToken = -1; 
       // Look up the token "wff" (hard-coded) if we haven't found it before
       if (wffToken == -1) { // First time
@@ -3513,7 +3512,6 @@ vstring bigSub(vstring bignum1, vstring bignum2) {
 //     // Suppress leading 0s
 //     let(&bignum3, right(bignum3, 2));
 //   }
-//   free_vstring(bignum1cmpl); // Deallocate
 //   return bignum3;
 // }
 //
@@ -4172,7 +4170,7 @@ void writeExtractedSource(
 
   // Write the output file.
   // (We don't call the standard output functions because there's too
-  // much customization needed).
+  // much customization needed.)
   print2("Creating the final output file \"%s\"...\n", fullOutput_fn);
 
   fp = fSafeOpen(fullOutput_fn, "w", noVersioningFlag);
@@ -4223,7 +4221,8 @@ void writeExtractedSource(
           &hugeHdrComment, &bigHdrComment, &smallHdrComment,
           &tinyHdrComment,
           1, // fineResolution
-          1); // fullComment
+          1 // fullComment
+          );
       freeTempAlloc();
       if (hugeHdrNeeded[stmt] == 'Y') {
         fixUndefinedLabels(extractNeeded, &hugeHdrComment);
@@ -5472,8 +5471,7 @@ void showDiscouraged(void) {
 // step and is returned as is.  If format is illegal, -1 is returned.
 long getStepNum(vstring relStep, // User's argument
    nmbrString *pfInProgress, // g_ProofInProgress.proof
-   flag allFlag // 1 = "ALL" is permissible
-   )
+   flag allFlag) // 1 = "ALL" is permissible
 {
   long pfLen, i, j, relStepVal, actualStepVal;
   flag negFlag = 0;
@@ -5660,8 +5658,8 @@ long getStatementNum(vstring stmtName, // Possibly with wildcards.
   for (stmt = startStmt; stmt <= g_statements; stmt++) {
 
     if (stmt >= maxStmt) {
-      if (matchesFound > 0) break; // Normal exit when a match was found
-      if (!uniqueFlag) break; // We only want to scan up to maxStmt anyway
+      if (matchesFound > 0) break; // Normal exit when a match was found.
+      if (!uniqueFlag) break; // We only want to scan up to maxStmt anyway.
       // Otherwise, we continue to see if there is a later match, for
       // error message purposes.
     }
@@ -6043,9 +6041,9 @@ void outputMidi(long plen, nmbrString *indentationLevels,
   } while ((midiMinKey < absMinKey || midiMaxKey > absMaxKey) &&
       midiKeyInc > 0);
 
-  // Open the output file
-  let(&midiFileName, cat(g_Statement[g_showStatement].labelName,
-      ".txt", NULL)); // Create file name from statement label
+  // Open the output file.
+  // Create file name from statement label.
+  let(&midiFileName, cat(g_Statement[g_showStatement].labelName, ".txt", NULL));
   print2("Creating MIDI source file \"%s\"...", midiFileName);
 
   // fSafeOpen() renames existing files with ~1,~2,etc.  This way

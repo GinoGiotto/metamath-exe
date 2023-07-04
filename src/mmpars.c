@@ -2540,10 +2540,9 @@ char parseProof(long statemNum)
 
       if (matchingHyp != -1) { // All hypotheses found
         if (nmbrLen(rearrangedSubProofs) != conclSubProofLen - 1
-        // Uncomment above if bad proof triggers this bug
           // && returnFlag < 2
-          ) 
-        {        
+          ) {
+          // Uncomment above if bad proof triggers this bug
           bug(1732);
         }
         nmbrLet(&(wrkProofString), nmbrCat(
@@ -3044,7 +3043,7 @@ char parseCompressedProof(long statemNum)
   } // Next step
 
   // ***** Create the starting label map (local labels will be
-  //         added as they are found) *****
+  //       added as they are found) *****
   g_WrkProof.compressedPfNumLabels = g_Statement[statemNum].numReqHyp;
   nmbrTmpPtr = g_Statement[statemNum].reqHypList;
   for (i = 0; i < g_WrkProof.compressedPfNumLabels; i++) {
@@ -3712,7 +3711,7 @@ long whiteSpaceLen(char *ptr) {
   return 0; // Dummy return - never happens
 } // whiteSpaceLen
 
-// For .mm file splitting
+// For .mm file splitting.
 // This function is like whiteSpaceLen() except that comments are NOT
 // considered white space.  ptr should point to the first character
 // of the white space.  If ptr does not point to a white space character, 0
@@ -3732,8 +3731,8 @@ long rawWhiteSpaceLen(char *ptr) {
 // This function returns the length of the token (non-white-space) starting at
 // ptr.  Comments are considered white space.  ptr should point to the first
 // character of the token.  If ptr points to a white space character, 0
-// is returned.  If ptr points to a null character, 0 is returned. If ptr
-// points to a keyword, 0 is returned. A keyword ends a token.
+// is returned.  If ptr points to a null character, 0 is returned.  If ptr
+// points to a keyword, 0 is returned.  A keyword ends a token.
 // Tokens may be of the form "$nn"; this is tolerated (used in parsing
 // user math strings in parseMathTokens()).  An (illegal) token of this form
 // in the source will be detected earlier, so this won't cause
@@ -3765,10 +3764,10 @@ long tokenLen(char *ptr)
 } // tokenLen
 
 // This function returns the length of the token (non-white-space) starting at
-// ptr. Comments are considered white space. ptr should point to the first
-// character of the token. If ptr points to a white space character, 0
-// is returned. If ptr points to a null character, 0 is returned.
-// Unlike tokenLen(), keywords are not treated as special. In particular:
+// ptr.  Comments are considered white space.  ptr should point to the first
+// character of the token.  If ptr points to a white space character, 0
+// is returned.  If ptr points to a null character, 0 is returned.
+// Unlike tokenLen(), keywords are not treated as special.  In particular:
 // if ptr points to a keyword, 0 is NOT returned (instead, 2 is returned),
 // and a keyword does NOT end a token (which is a relic of days before
 // whitespace surrounding a token was part of the spec, but still serves
@@ -3848,13 +3847,12 @@ long countLines(const char *start, long length) {
 // white space and comments, from first token through all white space and
 // comments after last token.
 // This allows us to modify the input file with Metamath.
-// Note: the text near end of file is obtained from g_Statement[g_statements
-// + 1]
+// Note: the text near end of file is obtained from g_Statement[g_statements + 1]
 // ???This does not yet implement restoration of the various input files;
 // all included files are merged into one.
 // Caller must deallocated returned string.
 // reformatFlag= 0: WRITE SOURCE, 1: WRITE SOURCE / FORMAT,
-// 2: WRITE SOURCE / REWRAP
+// 2: WRITE SOURCE / REWRAP.
 // Note that the labelSection, mathSection, and proofSection do not
 // contain keywords ($a, $p,...; $=; $.).  The keywords are added
 // by this function when the statement is written.
@@ -4158,7 +4156,7 @@ vstring outputStatement(long stmt, flag reformatFlag) {
         pos = rinstr(labelSection, "\n");
         // If there is none, insert it (unless first line in file)
         if (pos == 0 && stmt > 1) {
-          let(&labelSection, cat(edit(labelSection, 128 /* trailing spaces */),
+          let(&labelSection, cat(edit(labelSection, 128), // trailing spaces
               "\n", NULL));
           pos = (long)strlen(labelSection) + 1;
         }
@@ -5363,7 +5361,7 @@ vstring writeSourceToBuffer(void) {
       }
       // Adjust offset and continue.
       // We don't go the the normal end of the 'B' because it may
-      // have other 'B's inside. Instead, just skip past the Begin.
+      // have other 'B's inside.  Instead, just skip past the Begin.
       startOffset = cmdPos2 - 1; // don't use endPos2
     } else if (cmdType == 'N') {
       // We're done
@@ -5699,9 +5697,9 @@ vstring readInclude(const char *fileBuf, long fileBufOffset,
           // parent file).
           // -1 since startOffset is 0-based but cmdPos2 is 1-based
           startOffset = cmdPos1 + newInclSize - 1; 
-              // + inclSize  /@ Use instead of strlen for speed @/
-              // + (long)strlen(inclSuffix)
-              ;  // -1 since startOffset is 0-based but cmdPos1 is 1-based
+              // + inclSize  // Use instead of strlen for speed
+              // + (long)strlen(inclSuffix);
+              // -1 since startOffset is 0-based but cmdPos1 is 1-based
           // TODO: update line numbers for error msgs.
           break;
         case 'S':
@@ -5903,8 +5901,8 @@ vstring readInclude(const char *fileBuf, long fileBufOffset,
     // This entry is identified by pushOrPop = 1
     // Name of the file to be included.
     g_IncludeCall[saveInclCalls].source_fn = "";
+    // Source file containing this inclusion
     let(&g_IncludeCall[saveInclCalls].source_fn,
-        // Source file containing this inclusion
         sourceFileName);
     // This is the position of the continuation of the parent
     g_IncludeCall[saveInclCalls].current_offset = fileBufOffset + cmdPos1
@@ -6006,9 +6004,9 @@ vstring readSourceAndIncludes(const char *inputFn /* input */, long *size /* out
   newFileBuf = readInclude(fileBuf, 0, /* inputFn, */ inputFn, &(*size),
       1 /* parentLineNum */, &errorFlag);
   // This is the starting character position of the included file w.r.t entire
-  // source buffer.Here, it points to the nonexistent character just beyond end
-  // of main file(after all includes are expanded).Note that readInclude() may 
-  // change g_includeCalls, so use 1 explicitly.
+  // source buffer. Here, it points to the nonexistent character just beyond end
+  // of main file (after all includes are expanded).
+  // Note that readInclude() may change g_includeCalls, so use 1 explicitly.
   g_IncludeCall[1].current_offset = *size;
   free_vstring(fileBuf); // Deallocate
 // D // printf("*size=%ld\n",*size);

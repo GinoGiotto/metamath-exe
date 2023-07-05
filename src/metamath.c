@@ -855,7 +855,7 @@ void command(int argc, char *argv[]) {
   flag linearFlag; // For SHOW LABELS
   vstring_def(bgcolor); // For SHOW STATEMENT definition list
 
-  flag verboseMode, mayGrowFlag //, noDistinctFlag; // For MINIMIZE_WITH
+  flag verboseMode, mayGrowFlag; // , noDistinctFlag // For MINIMIZE_WITH
   long prntStatus; // For MINIMIZE_WITH
   flag hasWildCard; // For MINIMIZE_WITH
   long exceptPos; // For MINIMIZE_WITH
@@ -1074,8 +1074,8 @@ void command(int argc, char *argv[]) {
       }
     }
 
-    // See if it's an operating system command
-    // (This is a command line that begins with a quote)
+    // See if it's an operating system command.
+    // (This is a command line that begins with a quote.)
     if (g_commandLine[0] == '\'' || g_commandLine[0] == '\"') {
       // See if this computer has this feature
       if (!system(NULL)) {
@@ -2247,7 +2247,7 @@ void command(int argc, char *argv[]) {
         }
         if (!strcmp(left(str1, 21), "<!-- last updated -->")) {
           let(&str1, cat(left(str1, 21), " <I>Last updated on ", date(),
-          // ??Future: use timezones properly
+          // ??Future: use timezones properly.
           // Just make it "ET" for "Eastern Time"
             " at ", time_(), " ET.</I>", NULL));
         }
@@ -4122,7 +4122,7 @@ void command(int argc, char *argv[]) {
 
       processUndoStack(NULL, PUS_INIT, "", 0); // Optional?
       // Put the initial proof into the UNDO stack; we don't need
-      // the info string since it won't be undone
+      // the info string since it won't be undone.
       processUndoStack(&g_ProofInProgress, PUS_PUSH, "", 0);
       continue;
     }

@@ -5299,7 +5299,7 @@ void command(int argc, char *argv[]) {
               if (!mayGrowFlag && newCompressedLength > oldCompressedLength) {
                 // The compressed proof length increased, so don't use it.
                 // (If it stayed the same, we will use it because the uncompressed
-                // length did decrease.).
+                // length did decrease.)
                 // Revert the proof to before minimization.
                 if (verboseMode) {
                   print2(

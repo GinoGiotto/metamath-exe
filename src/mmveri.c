@@ -630,7 +630,7 @@ ambiguityCheck: // Re-entry point to see if unification is unique
               // Scan the required disjoint variable hypotheses to see if they're
               // in it.
               // First, see if both variables are in the required list.
-              flag foundFlag = 0;
+              foundFlag = 0;
               for (long i = reqStart; i < dILenR; i++) {
                 if (nmbrTmpPtrAIR[i] == aToken2) {
                   if (nmbrTmpPtrBIR[i] == bToken2) {
@@ -710,7 +710,7 @@ ambiguityCheck: // Re-entry point to see if unification is unique
   long substSchemeLen = nmbrLen(g_Statement[substScheme].mathString);
   // Calculate the length of the final result
   q = 0;
-  for (long p = 0; p < substSchemeLen; p++) {
+  for (p = 0; p < substSchemeLen; p++) {
     long tokenNum = g_Statement[substScheme].mathString[p];
     if (g_MathToken[tokenNum].tokenType == (char)con_) {
       q++;
@@ -723,7 +723,7 @@ ambiguityCheck: // Re-entry point to see if unification is unique
   nmbrLet(&result,nmbrSpace(resultLen));
   // Assign the final result
   q = 0;
-  for (long p = 0; p < substSchemeLen; p++) {
+  for (p = 0; p < substSchemeLen; p++) {
     long tokenNum = g_Statement[substScheme].mathString[p];
     if (g_MathToken[tokenNum].tokenType == (char)con_) {
       result[q] = tokenNum;

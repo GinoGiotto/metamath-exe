@@ -89,7 +89,7 @@ struct Buffer {
 /*!
  * a preallocated buffer supporting formatting.
  */
-static struct Buffer buffer;
+static struct Buffer globalBuffer;
 
 /*!
  * \brief initialize and empty the message buffer
@@ -174,8 +174,7 @@ enum SourceType {
  * \return the number of characters copied.
  * \pre \ref initBuffer was called
  */
-static unsigned appendText(char const* source, enum SourceType type,
-                           struct Buffer* buffer) {
+static long appendText(char const* source, enum SourceType type, struct Buffer* buffer) {
   char escape = type == FORMAT? MMFATL_PH_PREFIX : NUL;
   char const* start = buffer->begin;
   while (*source != NUL && *source != escape && !isBufferOverflow(buffer))
@@ -224,7 +223,7 @@ struct ParserState {
   va_list args;
 };
 
-static struct ParserState state;
+static struct ParserState globalState;
 
 /*!
  * \brief initialize the parser state (but not the associated message buffer!)
@@ -273,7 +272,7 @@ static char const* unsignedToString(unsigned value) {
     digits[--ofs] = '0';
   else {
     while (value) {
-      digits[--ofs] = (value % 10) + '0';
+      digits[--ofs] = (char) ((value % 10) + '0');
       value /= 10;
     }
   }
@@ -311,7 +310,7 @@ static bool checkOverflow(struct ParserState* state) {
  *   overflow.
  */
 static void handleText(struct ParserState* state) {
-  state->format += appendText(state->format, FORMAT, &buffer);
+  state->format += appendText(state->format, FORMAT, &globalBuffer);
   checkOverflow(state);
 }
 
@@ -397,7 +396,7 @@ static void parse(struct ParserState* state) {
  * \return [not null] a pointer to the Buffer instance
  */
 inline static struct Buffer* getBufferInstance(void) {
-  return &buffer;
+  return &globalBuffer;
 }
 
 /*!
@@ -409,7 +408,7 @@ inline static struct Buffer* getBufferInstance(void) {
  * \return [not null] a pointer to the ParserState instance
  */
 inline static struct ParserState* getParserStateInstance(void) {
-  return &state;
+  return &globalState;
 }
 
 void fatalErrorInit(void) {
@@ -482,28 +481,28 @@ void fatalErrorExitAt(char const* file, unsigned line,
 
 static bool test_fatalErrorInit(void) {
   // emulate memory corruption
-  memset(&buffer, 'x', sizeof(buffer));
-  state.format = NULL;
+  memset(&globalBuffer, 'x', sizeof(globalBuffer));
+  globalState.format = NULL;
 
   fatalErrorInit();
 
-  ASSERT(*state.format == NUL);
-  ASSERT(buffer.begin == buffer.text);
+  ASSERT(*globalState.format == NUL);
+  ASSERT(globalBuffer.begin == globalBuffer.text);
 
   unsigned i = 0;
   // check the buffer is filled with NUL...
   for (; i < MMFATL_MAX_MSG_SIZE; ++i)
-    ASSERT(buffer.text[i] == NUL);
+    ASSERT(globalBuffer.text[i] == NUL);
 
-  ASSERT(buffer.end == buffer.text + i);
+  ASSERT(globalBuffer.end == globalBuffer.text + i);
 
   // ...and has the ELLIPSIS string at the end...
   char ellipsis[] = MMFATL_ELLIPSIS;
   for (unsigned j = 0; ellipsis[j] != NUL; ++i, ++j)
-    ASSERT(buffer.text[i] == ellipsis[j]);
+    ASSERT(globalBuffer.text[i] == ellipsis[j]);
 
   // ... and a terminating NUL character
-  ASSERT(buffer.text[i] == NUL);
+  ASSERT(globalBuffer.text[i] == NUL);
 
   return true;
 }
@@ -511,29 +510,29 @@ static bool test_fatalErrorInit(void) {
 // for buffer overflow tests, free space is surrounded by $, so
 // limit violations can be detected.
 static void limitFreeBuffer(unsigned size) {
-  initBuffer(&buffer);
-  *buffer.begin++ = '$';
-  buffer.end = buffer.begin + size;
-  *buffer.end = '$';
-  *(buffer.end + 1) = NUL;
+  initBuffer(&globalBuffer);
+  *globalBuffer.begin++ = '$';
+  globalBuffer.end = globalBuffer.begin + size;
+  *globalBuffer.end = '$';
+  *(globalBuffer.end + 1) = NUL;
 }
 
 static bool test_isBufferOverflow(void) {
   fatalErrorInit();
 
   limitFreeBuffer(0);
-  ASSERT(isBufferOverflow(&buffer));
+  ASSERT(isBufferOverflow(&globalBuffer));
   limitFreeBuffer(1);
-  ASSERT(!isBufferOverflow(&buffer));
+  ASSERT(!isBufferOverflow(&globalBuffer));
 
   char const* format = "abc";
-  state.format = format;
+  globalState.format = format;
   limitFreeBuffer(1);
-  ASSERT(checkOverflow(&state));
-  ASSERT(state.format == format);
+  ASSERT(checkOverflow(&globalState));
+  ASSERT(globalState.format == format);
   limitFreeBuffer(0);
-  ASSERT(!checkOverflow(&state));
-  ASSERT(*state.format == NUL);
+  ASSERT(!checkOverflow(&globalState));
+  ASSERT(*globalState.format == NUL);
 
   return true;
 }
@@ -541,9 +540,9 @@ static bool test_isBufferOverflow(void) {
 static char const* bufferCompare(char const* match, int from, unsigned lg,
     unsigned begin)
 {
-  if (memcmp(buffer.begin + from, match, lg) != 0)
+  if (memcmp(globalBuffer.begin + from, match, lg) != 0)
     return "unexpected buffer contents";
-  return buffer.begin == buffer.text + begin ?
+  return globalBuffer.begin == globalBuffer.text + begin ?
     NULL : "unexpected buffer begin";
 }
 
@@ -561,7 +560,7 @@ static char const* bufferCompare(char const* match, int from, unsigned lg,
 static char const* testcase_appendText(char const* text, unsigned adv,
     char const* match, int from, int lg, unsigned begin) {
   char escape = *text == '%' ? FORMAT : STRING;
-  return appendText(text + 1, escape, &buffer) == adv ?
+  return appendText(text + 1, escape, &globalBuffer) == adv ?
     bufferCompare(match, from, lg, begin) :
     "incorrect number of bytes copied";
 }
@@ -610,55 +609,55 @@ static bool test_appendText(void) {
 
 static bool test_isBufferEmpty(void) {
   fatalErrorInit();
-  ASSERT(isBufferEmpty(&buffer));
-  appendText("a", STRING, &buffer);
-  ASSERT(!isBufferEmpty(&buffer));
+  ASSERT(isBufferEmpty(&globalBuffer));
+  appendText("a", STRING, &globalBuffer);
+  ASSERT(!isBufferEmpty(&globalBuffer));
   limitFreeBuffer(0);
-  ASSERT(!isBufferEmpty(&buffer));
+  ASSERT(!isBufferEmpty(&globalBuffer));
 
   return true;
 }
 
 static bool test_getLastBufferedChar(void) {
   fatalErrorInit();
-  ASSERT(getLastBufferedChar(&buffer) == NUL);
-  appendText("a", STRING, &buffer);
-  ASSERT(getLastBufferedChar(&buffer) == 'a');
+  ASSERT(getLastBufferedChar(&globalBuffer) == NUL);
+  appendText("a", STRING, &globalBuffer);
+  ASSERT(getLastBufferedChar(&globalBuffer) == 'a');
   limitFreeBuffer(1);
-  appendText("bc", STRING, &buffer);
-  ASSERT(getLastBufferedChar(&buffer) == 'b');
+  appendText("bc", STRING, &globalBuffer);
+  ASSERT(getLastBufferedChar(&globalBuffer) == 'b');
 
   return true;
 }
 
 static bool test_handleText(void) {
   fatalErrorInit();
-  char const* format = state.format;
+  char const* format = globalState.format;
   // no format
-  handleText(&state);
-  ASSERT(strcmp(buffer.text, "") == 0);
-  ASSERT(format == state.format);
+  handleText(&globalState);
+  ASSERT(strcmp(globalBuffer.text, "") == 0);
+  ASSERT(format == globalState.format);
 
-  state.format = "abc";
-  handleText(&state);
-  ASSERT(strcmp(buffer.text, "abc") == 0);
-  ASSERT(*state.format == NUL);
+  globalState.format = "abc";
+  handleText(&globalState);
+  ASSERT(strcmp(globalBuffer.text, "abc") == 0);
+  ASSERT(*globalState.format == NUL);
 
-  state.format = "abc%s";
-  handleText(&state);
-  ASSERT(strcmp(buffer.text, "abcabc") == 0);
-  ASSERT(*state.format == '%');
+  globalState.format = "abc%s";
+  handleText(&globalState);
+  ASSERT(strcmp(globalBuffer.text, "abcabc") == 0);
+  ASSERT(*globalState.format == '%');
 
   limitFreeBuffer(1);
-  state.format = "%s";
-  handleText(&state);
-  ASSERT(*state.format == '%');
-  ASSERT(buffer.begin == buffer.text + 1);
+  globalState.format = "%s";
+  handleText(&globalState);
+  ASSERT(*globalState.format == '%');
+  ASSERT(globalBuffer.begin == globalBuffer.text + 1);
 
-  state.format = "abc";
-  handleText(&state);
-  ASSERT(strcmp(buffer.text, "$a$") == 0);
-  ASSERT(*state.format == NUL);
+  globalState.format = "abc";
+  handleText(&globalState);
+  ASSERT(strcmp(globalBuffer.text, "$a$") == 0);
+  ASSERT(*globalState.format == NUL);
 
   return true;
 }
@@ -674,86 +673,86 @@ bool test_unsignedToString(void)
 }
 
 static bool test_handleSubstitution1(char const* format, ...) {
-  va_start(state.args, format);
+  va_start(globalState.args, format);
 
   // without initializing the buffer each test appends
   // to the result of the former test.
 
   // %s NULL
   fatalErrorInit();
-  state.format = format;
-  handleSubstitution(&state);
+  globalState.format = format;
+  handleSubstitution(&globalState);
   format += 2;
-  ASSERT(format == state.format);
-  ASSERT(strcmp(buffer.text, "") == 0);
+  ASSERT(format == globalState.format);
+  ASSERT(strcmp(globalBuffer.text, "") == 0);
 
   // %s ""
-  handleSubstitution(&state);
+  handleSubstitution(&globalState);
   format += 2;
-  ASSERT(format == state.format);
-  ASSERT(strcmp(buffer.text, "") == 0);
+  ASSERT(format == globalState.format);
+  ASSERT(strcmp(globalBuffer.text, "") == 0);
 
   // %s "abc"
-  handleSubstitution(&state);
+  handleSubstitution(&globalState);
   format += 2;
-  ASSERT(format == state.format);
-  ASSERT(strcmp(buffer.text, "abc") == 0);
+  ASSERT(format == globalState.format);
+  ASSERT(strcmp(globalBuffer.text, "abc") == 0);
 
   // %s "%s"
-  handleSubstitution(&state);
+  handleSubstitution(&globalState);
   format += 2;
-  ASSERT(format == state.format);
-  ASSERT(strcmp(buffer.text, "abc%s") == 0);
+  ASSERT(format == globalState.format);
+  ASSERT(strcmp(globalBuffer.text, "abc%s") == 0);
 
   // %u 0
-  handleSubstitution(&state);
+  handleSubstitution(&globalState);
   format += 2;
-  ASSERT(format == state.format);
-  ASSERT(strcmp(buffer.text, "abc%s0") == 0);
+  ASSERT(format == globalState.format);
+  ASSERT(strcmp(globalBuffer.text, "abc%s0") == 0);
 
   // %u 123
-  handleSubstitution(&state);
+  handleSubstitution(&globalState);
   format += 2;
-  ASSERT(format == state.format);
-  ASSERT(strcmp(buffer.text, "abc%s0123") == 0);
+  ASSERT(format == globalState.format);
+  ASSERT(strcmp(globalBuffer.text, "abc%s0123") == 0);
 
   // %u ~0u
-  initBuffer(&buffer);
-  handleSubstitution(&state);
+  initBuffer(&globalBuffer);
+  handleSubstitution(&globalState);
   format += 2;
-  ASSERT(format == state.format);
-  ASSERT(strtoul(buffer.text, NULL, 10) == ~0u);
+  ASSERT(format == globalState.format);
+  ASSERT(strtoul(globalBuffer.text, NULL, 10) == ~0u);
 
   // case buffer overflow
   limitFreeBuffer(1);
-  handleSubstitution(&state);
+  handleSubstitution(&globalState);
   format += 2;
-  ASSERT(*state.format == NUL);
+  ASSERT(*globalState.format == NUL);
   char const* errmsg = bufferCompare("$o$", -2, 3, 2);
   ASSERTF(errmsg == NULL, "%s\n", errmsg);
 
   // %%
-  initBuffer(&buffer);
-  state.format = format;
-  handleSubstitution(&state);
+  initBuffer(&globalBuffer);
+  globalState.format = format;
+  handleSubstitution(&globalState);
   format += 2;
-  ASSERT(format == state.format);
-  ASSERT(strcmp(buffer.text, "%") == 0);
+  ASSERT(format == globalState.format);
+  ASSERT(strcmp(globalBuffer.text, "%") == 0);
 
   // %;
-  handleSubstitution(&state);
-  ++state.format; // skip the ;
+  handleSubstitution(&globalState);
+  ++globalState.format; // skip the ;
   format += 2;
-  ASSERT(format == state.format);
-  ASSERT(strcmp(buffer.text, "%%") == 0);
+  ASSERT(format == globalState.format);
+  ASSERT(strcmp(globalBuffer.text, "%%") == 0);
 
   // %<NUL>
-  handleSubstitution(&state);
+  handleSubstitution(&globalState);
   ++format;
-  ASSERT(format == state.format);
-  ASSERT(strcmp(buffer.text, "%%%") == 0);
+  ASSERT(format == globalState.format);
+  ASSERT(strcmp(globalBuffer.text, "%%%") == 0);
 
-  va_end(state.args);
+  va_end(globalState.args);
   return true;
 }
 
@@ -765,11 +764,11 @@ bool test_handleSubstitution(void) {
 
 static char const* testcase_parse(char const* expect, char const* format, ...) {
   fatalErrorInit();
-  va_start(state.args, format);
-  state.format = format;
-  parse(&state);
-  va_end(state.args);
-  return strcmp(buffer.text, expect) == 0?
+  va_start(globalState.args, format);
+  globalState.format = format;
+  parse(&globalState);
+  va_end(globalState.args);
+  return strcmp(globalBuffer.text, expect) == 0?
     NULL
     : "text mismatch";
 }
@@ -793,13 +792,13 @@ static bool test_parse(void) {
   TESTCASE_parse("XY123ABabcST", "XY%uAB%sST", 123, "abc");
   // buffer overflow
   limitFreeBuffer(0);
-  state.format = "";
-  parse(&state);
-  ASSERT(strcmp(buffer.text, "$$") == 0);
+  globalState.format = "";
+  parse(&globalState);
+  ASSERT(strcmp(globalBuffer.text, "$$") == 0);
   limitFreeBuffer(1);
-  state.format = "123";
-  parse(&state);
-  ASSERT(strcmp(buffer.text, "$1$") == 0);
+  globalState.format = "123";
+  parse(&globalState);
+  ASSERT(strcmp(globalBuffer.text, "$1$") == 0);
 
   return true;
 }
@@ -809,26 +808,26 @@ static bool test_fatalErrorPush() {
 
   // case format NULL or empty (do nothing)
   ASSERT(fatalErrorPush(NULL));
-  ASSERT(strcmp(buffer.text, "") == 0);
+  ASSERT(strcmp(globalBuffer.text, "") == 0);
   ASSERT(fatalErrorPush(""));
-  ASSERT(strcmp(buffer.text, "") == 0);
+  ASSERT(strcmp(globalBuffer.text, "") == 0);
 
   // simple message, no placeholder
   ASSERT(fatalErrorPush("abc"));
-  ASSERT(strcmp(buffer.text, "abc") == 0);
+  ASSERT(strcmp(globalBuffer.text, "abc") == 0);
 
   // message with placeholders, appended
   ASSERT(fatalErrorPush("x%sy%uz", "--", 123));
-  ASSERT(strcmp(buffer.text, "abcx--y123z") == 0);
+  ASSERT(strcmp(globalBuffer.text, "abcx--y123z") == 0);
 
   // overflow
   limitFreeBuffer(2);
   ASSERT(!fatalErrorPush("abc"));
-  ASSERT(strcmp(buffer.text, "$ab$") == 0);
+  ASSERT(strcmp(globalBuffer.text, "$ab$") == 0);
 
   ASSERT(!fatalErrorPush(NULL));
   ASSERT(!fatalErrorPush(""));
-  ASSERT(strcmp(buffer.text, "$ab$") == 0);
+  ASSERT(strcmp(globalBuffer.text, "$ab$") == 0);
 
   return true;
 }
@@ -836,21 +835,21 @@ static bool test_fatalErrorPush() {
 static bool test_fatalErrorPrintAndExit(void) {
   fatalErrorInit(); // pre-condition
   fatalErrorPrintAndExit();
-  ASSERT(strcmp(buffer.text, "") == 0);
+  ASSERT(strcmp(globalBuffer.text, "") == 0);
 
   fatalErrorPush("aaa");
   fatalErrorPrintAndExit();
-  ASSERT(strcmp(buffer.text, "aaa\n") == 0);
+  ASSERT(strcmp(globalBuffer.text, "aaa\n") == 0);
 
   // no second \n is appended
   fatalErrorPrintAndExit();
-  ASSERT(strcmp(buffer.text, "aaa\n") == 0);
+  ASSERT(strcmp(globalBuffer.text, "aaa\n") == 0);
 
   // in overflow condition do not append a LF
   fatalErrorInit();
-  while (!isBufferOverflow(&buffer)) // fill the buffer with "a"
+  while (!isBufferOverflow(&globalBuffer)) // fill the buffer with "a"
     fatalErrorPush("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-  ASSERT(strcmp(buffer.text + MMFATL_MAX_MSG_SIZE - 3, "aaa" MMFATL_ELLIPSIS) == 0);
+  ASSERT(strcmp(globalBuffer.text + MMFATL_MAX_MSG_SIZE - 3, "aaa" MMFATL_ELLIPSIS) == 0);
 
   return true;
 }
@@ -860,17 +859,17 @@ static bool test_fatalErrorExitAt() {
   // nor exits.  The message is still in the buffer.
 
   fatalErrorExitAt("test.c", 1000, "%s failed!", "program");
-  ASSERT(strcmp(buffer.text, "At test.c:1000\nprogram failed!\n") == 0);
+  ASSERT(strcmp(globalBuffer.text, "At test.c:1000\nprogram failed!\n") == 0);
   // ignoring line
   fatalErrorExitAt("x.c", 0, "test %u failed!", 5);
-  ASSERT(strcmp(buffer.text, "In file x.c:\ntest 5 failed!\n") == 0);
+  ASSERT(strcmp(globalBuffer.text, "In file x.c:\ntest 5 failed!\n") == 0);
   // ignoring file
   fatalErrorExitAt(NULL, 123, "%s", "need help!\n");
-  ASSERT(strcmp(buffer.text, "In line 123:\nneed help!\n") == 0);
+  ASSERT(strcmp(globalBuffer.text, "In line 123:\nneed help!\n") == 0);
 
   // ignoring error location
   fatalErrorExitAt(NULL, 0, "take lessons, you fool!");
-  ASSERT(strcmp(buffer.text, "take lessons, you fool!\n") == 0);
+  ASSERT(strcmp(globalBuffer.text, "take lessons, you fool!\n") == 0);
 
   return true;
 }
